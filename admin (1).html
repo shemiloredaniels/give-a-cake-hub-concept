@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Give a Cake — Admin Dashboard</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    body { background: #F0EBE4; }
+    .admin-nav-bar {
+      background: var(--ink);
+      padding: 0 2rem;
+      display: flex; align-items: center; justify-content: space-between; height: 64px;
+      position: sticky; top: 0; z-index: 100;
+    }
+    .admin-nav-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+    .admin-nav-logo-icon { width: 34px; height: 34px; background: var(--caramel); border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+    .admin-nav-logo-icon svg { width: 18px; height: 18px; fill: white; }
+    .admin-nav-title { font-family: var(--font-display); font-size: 16px; color: white; }
+    .admin-nav-badge { font-size: 11px; background: var(--caramel); color: white; padding: 3px 9px; border-radius: 20px; margin-left: 8px; }
+    .admin-nav-right { display: flex; align-items: center; gap: 1.5rem; }
+    .admin-nav-right a { text-decoration: none; font-size: 14px; color: rgba(255,255,255,0.65); }
+    .admin-nav-right a:hover { color: white; }
+    .admin-main { max-width: 1120px; margin: 0 auto; padding: 2.5rem 2rem; }
+    .admin-page-header { margin-bottom: 2rem; }
+    .admin-page-header h1 { font-family: var(--font-display); font-size: 2rem; color: var(--ink); }
+    .admin-page-header p { color: var(--ink-light); font-size: 14px; margin-top: 4px; }
+    .admin-stat-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; margin-bottom: 2rem; }
+    .astat { background: white; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 1.25rem; }
+    .astat-num { font-family: var(--font-display); font-size: 2rem; color: var(--ink); line-height: 1; }
+    .astat-label { font-size: 12px; color: var(--ink-light); margin-top: 4px; }
+    .astat-change { font-size: 11px; color: var(--sage); margin-top: 6px; }
+    .admin-cols { display: grid; grid-template-columns: 1.5fr 1fr; gap: 1.25rem; }
+    .admin-panel { background: white; border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; }
+    .panel-title { font-size: 15px; font-weight: 500; color: var(--ink); margin-bottom: 1.25rem; display: flex; align-items: center; justify-content: space-between; }
+    .panel-title button { font-size: 12px; padding: 7px 14px; background: var(--caramel); color: white; border: none; border-radius: 20px; cursor: pointer; font-family: var(--font-body); }
+    .panel-title button:hover { background: var(--caramel-dark); }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    thead th { text-align: left; padding: 8px 10px; color: var(--ink-light); font-weight: 400; border-bottom: 1px solid var(--border); font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; }
+    tbody td { padding: 11px 10px; border-bottom: 1px solid var(--border); color: var(--ink); vertical-align: middle; }
+    tbody tr:last-child td { border-bottom: none; }
+    tbody tr:hover { background: var(--cream); }
+    .badge { display: inline-block; font-size: 11px; padding: 3px 9px; border-radius: 20px; }
+    .badge-open { background: var(--sage-light); color: var(--sage); }
+    .badge-taken { background: var(--caramel-light); color: var(--caramel-dark); }
+    .badge-pending { background: #FFF3E0; color: #B45309; }
+    .badge-active { background: #DBEAFE; color: #1E40AF; }
+    .act-btns { display: flex; gap: 5px; }
+    .act-btns button { font-size: 11px; padding: 5px 9px; border-radius: 4px; cursor: pointer; font-family: var(--font-body); border: 1px solid var(--border-strong); background: transparent; color: var(--ink-mid); white-space: nowrap; }
+    .act-btns button:hover { border-color: var(--caramel); color: var(--caramel); }
+    .act-btns button.del:hover { border-color: #DC2626; color: #DC2626; }
+    /* sidebar panels */
+    .sidebar-section { margin-bottom: 1.5rem; }
+    .sidebar-section:last-child { margin-bottom: 0; }
+    .sidebar-title { font-size: 13px; font-weight: 500; color: var(--ink-mid); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.06em; font-size: 11px; }
+    .npo-quick-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--border); }
+    .npo-quick-row:last-child { border-bottom: none; }
+    .npo-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--sage); flex-shrink: 0; }
+    .npo-quick-name { font-size: 13px; color: var(--ink); flex: 1; }
+    .npo-quick-count { font-size: 12px; color: var(--ink-light); }
+    .volunteer-row { display: flex; align-items: center; gap: 8px; padding: 9px 0; border-bottom: 1px solid var(--border); }
+    .volunteer-row:last-child { border-bottom: none; }
+    .vol-avatar { width: 30px; height: 30px; border-radius: 50%; font-family: var(--font-display); font-size: 12px; font-weight: 600; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .vol-name { font-size: 13px; color: var(--ink); flex: 1; }
+    .vol-bakes { font-size: 11px; color: var(--ink-light); }
+    /* modal */
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(30,26,23,0.55); z-index: 200; align-items: center; justify-content: center; padding: 1rem; }
+    .modal-overlay.open { display: flex; }
+    .modal { background: white; border-radius: var(--radius); padding: 2rem; max-width: 460px; width: 100%; }
+    .modal h2 { font-family: var(--font-display); font-size: 1.4rem; margin-bottom: 0.25rem; color: var(--ink); }
+    .modal .modal-sub { font-size: 13px; color: var(--ink-light); margin-bottom: 1.25rem; }
+    .modal label { display: block; font-size: 13px; color: var(--ink-mid); margin-bottom: 4px; margin-top: 14px; }
+    .modal input, .modal select, .modal textarea { width: 100%; padding: 10px 12px; border: 1px solid var(--border-strong); border-radius: var(--radius-sm); font-size: 14px; font-family: var(--font-body); color: var(--ink); background: var(--cream); }
+    .modal input:focus, .modal select:focus { outline: 2px solid var(--caramel); border-color: transparent; }
+    .modal-actions { display: flex; gap: 10px; margin-top: 1.5rem; }
+    .modal-actions button { flex: 1; padding: 11px; border-radius: 8px; font-size: 14px; font-family: var(--font-body); cursor: pointer; font-weight: 500; }
+    .btn-cancel { background: transparent; border: 1px solid var(--border-strong); color: var(--ink-mid); }
+    .btn-submit { background: var(--caramel); color: white; border: none; }
+    .btn-submit:hover { background: var(--caramel-dark); }
+    .toast { position: fixed; bottom: 2rem; right: 2rem; background: var(--ink); color: white; padding: 12px 20px; border-radius: 8px; font-size: 14px; z-index: 300; transform: translateY(80px); opacity: 0; transition: all 0.3s; pointer-events: none; }
+    .toast.show { transform: translateY(0); opacity: 1; }
+    @media (max-width: 820px) { .admin-cols { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+
+<nav class="admin-nav-bar">
+  <a class="admin-nav-logo" href="index.html">
+    <div class="admin-nav-logo-icon">
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M18 11h-1.5V9.5a.5.5 0 0 0-1 0V11H14a.5.5 0 0 0 0 1h1.5v1.5a.5.5 0 0 0 1 0V12H18a.5.5 0 0 0 0-1ZM12 2a5 5 0 0 0-5 5H4a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3v6a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-6a3 3 0 0 0 1.83-2.73A5 5 0 0 0 12 2Z"/></svg>
+    </div>
+    <span class="admin-nav-title">Give a Cake</span>
+    <span class="admin-nav-badge">Admin</span>
+  </a>
+  <div class="admin-nav-right">
+    <a href="index.html">← Public site</a>
+    <a href="#">Settings</a>
+    <a href="#" style="color:rgba(255,255,255,0.4);">Sign out</a>
+  </div>
+</nav>
+
+<main class="admin-main">
+  <div class="admin-page-header">
+    <h1>Dashboard</h1>
+    <p>Manage donation slots, nonprofit partners, and baker volunteers.</p>
+  </div>
+
+  <!-- Stats -->
+  <div class="admin-stat-row">
+    <div class="astat">
+      <div class="astat-num">32</div>
+      <div class="astat-label">Open slots this month</div>
+      <div class="astat-change">↑ 4 added this week</div>
+    </div>
+    <div class="astat">
+      <div class="astat-num">247</div>
+      <div class="astat-label">Active baker volunteers</div>
+      <div class="astat-change">↑ 11 new this month</div>
+    </div>
+    <div class="astat">
+      <div class="astat-num">89</div>
+      <div class="astat-label">Nonprofit partners</div>
+      <div class="astat-change">3 pending approval</div>
+    </div>
+    <div class="astat">
+      <div class="astat-num" id="admin-stat-donations">4,218</div>
+      <div class="astat-label">Items donated (2026)</div>
+      <div class="astat-change">↑ 62 this month</div>
+    </div>
+  </div>
+
+  <div class="admin-cols">
+    <!-- LEFT: Slots table -->
+    <div>
+      <div class="admin-panel" style="margin-bottom:1.25rem;">
+        <div class="panel-title">
+          Donation slots
+          <button onclick="openAddSlotModal()">+ Add slot</button>
+        </div>
+        <table id="slots-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Organization</th>
+              <th>Type</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="slots-tbody"></tbody>
+        </table>
+      </div>
+
+      <!-- Nonprofits table -->
+      <div class="admin-panel">
+        <div class="panel-title">
+          Nonprofit partners
+          <button onclick="openAddNpoModal()">+ Add nonprofit</button>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Distance</th>
+              <th>Accepts</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="npo-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- RIGHT: Sidebar -->
+    <div>
+      <div class="admin-panel" style="margin-bottom:1.25rem;">
+        <div class="sidebar-title">Slots by nonprofit</div>
+        <div class="sidebar-section" id="npo-slot-counts"></div>
+      </div>
+      <div class="admin-panel">
+        <div class="panel-title" style="margin-bottom:1rem;">
+          Baker volunteers
+          <button onclick="openAddBakerModal()">+ Add baker</button>
+        </div>
+        <div id="baker-list"></div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- MODAL: Add slot -->
+<div class="modal-overlay" id="add-slot-modal">
+  <div class="modal">
+    <h2>Add donation slot</h2>
+    <p class="modal-sub">This slot will appear on the public calendar once saved.</p>
+    <label>Date</label>
+    <input type="date" id="new-slot-date" />
+    <label>Nonprofit partner</label>
+    <select id="new-slot-npo">
+      <option value="">Select a nonprofit…</option>
+    </select>
+    <label>Item type requested</label>
+    <input type="text" id="new-slot-type" placeholder="e.g. Breads & pastries, any items…" />
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal('add-slot-modal')">Cancel</button>
+      <button class="btn-submit" onclick="addSlot()">Save slot</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Add nonprofit -->
+<div class="modal-overlay" id="add-npo-modal">
+  <div class="modal">
+    <h2>Add nonprofit partner</h2>
+    <p class="modal-sub">They'll appear on the public site after saving.</p>
+    <label>Organization name</label>
+    <input type="text" id="new-npo-name" placeholder="Full legal name" />
+    <label>Distance (from city center)</label>
+    <input type="text" id="new-npo-dist" placeholder="e.g. 3.2 mi" />
+    <label>Accepted items</label>
+    <input type="text" id="new-npo-accepts" placeholder="e.g. Breads, cookies, nut-free" />
+    <label>Drop-off hours</label>
+    <input type="text" id="new-npo-hours" placeholder="e.g. Mon–Fri 9am–4pm" />
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal('add-npo-modal')">Cancel</button>
+      <button class="btn-submit" onclick="addNpo()">Save nonprofit</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Add baker -->
+<div class="modal-overlay" id="add-baker-modal">
+  <div class="modal">
+    <h2>Add baker volunteer</h2>
+    <label>Full name</label>
+    <input type="text" id="new-baker-name" placeholder="Full name" />
+    <label>Email</label>
+    <input type="email" id="new-baker-email" placeholder="baker@example.com" />
+    <label>Distance</label>
+    <input type="text" id="new-baker-dist" placeholder="e.g. 2.5 mi" />
+    <label>Short bio</label>
+    <textarea id="new-baker-bio" rows="3" placeholder="What's their baking background?"></textarea>
+    <label>Specialty items (comma separated)</label>
+    <input type="text" id="new-baker-tags" placeholder="e.g. Sourdough, Muffins, Layer cakes" />
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal('add-baker-modal')">Cancel</button>
+      <button class="btn-submit" onclick="addBaker()">Save baker</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="js/main.js"></script>
+<script>
+  const COLORS = [
+    {bg:'#FAC775',text:'#412402'},{bg:'#9FE1CB',text:'#04342C'},{bg:'#CECBF6',text:'#26215C'},
+    {bg:'#F5C4B3',text:'#4A1B0C'},{bg:'#C0DD97',text:'#173404'},{bg:'#B5D4F4',text:'#042C53'}
+  ];
+
+  // ── RENDER SLOTS TABLE ──
+  function renderSlotsTable() {
+    const tbody = document.getElementById('slots-tbody');
+    const allSlots = [...data.slots.july, ...data.slots.august, ...data.slots.september];
+    tbody.innerHTML = allSlots.map(s => `
+      <tr>
+        <td style="white-space:nowrap">${s.label}</td>
+        <td>${s.org}</td>
+        <td style="color:var(--ink-light)">${s.type}</td>
+        <td><span class="badge ${s.taken ? 'badge-taken' : 'badge-open'}">${s.taken ? (s.volunteer || 'Taken') : 'Open'}</span></td>
+        <td>
+          <div class="act-btns">
+            ${s.taken ? `<button onclick="releaseSlot(${s.id})">Release</button>` : `<button onclick="markTaken(${s.id})">Mark taken</button>`}
+            <button class="del" onclick="deleteSlot(${s.id})">Delete</button>
+          </div>
+        </td>
+      </tr>
+    `).join('');
+  }
+
+  // ── RENDER NPO TABLE ──
+  function renderNpoTable() {
+    const tbody = document.getElementById('npo-tbody');
+    tbody.innerHTML = data.nonprofits.map(n => `
+      <tr>
+        <td><strong style="font-weight:500">${n.name}</strong></td>
+        <td style="color:var(--ink-light)">${n.dist}</td>
+        <td style="color:var(--ink-light);max-width:180px">${n.accepts}</td>
+        <td>
+          <div class="act-btns">
+            <button onclick="showToast('Edit coming soon')">Edit</button>
+            <button class="del" onclick="deleteNpo(${n.id})">Remove</button>
+          </div>
+        </td>
+      </tr>
+    `).join('');
+  }
+
+  // ── RENDER NPO SLOT COUNTS ──
+  function renderNpoSlotCounts() {
+    const el = document.getElementById('npo-slot-counts');
+    const allSlots = [...data.slots.july, ...data.slots.august, ...data.slots.september];
+    const counts = {};
+    allSlots.forEach(s => { counts[s.org] = (counts[s.org] || 0) + 1; });
+    const sorted = Object.entries(counts).sort((a,b) => b[1]-a[1]).slice(0,6);
+    el.innerHTML = sorted.map(([org, count]) => `
+      <div class="npo-quick-row">
+        <div class="npo-dot"></div>
+        <div class="npo-quick-name">${org}</div>
+        <div class="npo-quick-count">${count} slots</div>
+      </div>
+    `).join('');
+  }
+
+  // ── RENDER BAKER LIST ──
+  function renderBakerList() {
+    const el = document.getElementById('baker-list');
+    el.innerHTML = data.bakers.map((b, i) => {
+      const c = COLORS[i % COLORS.length];
+      return `
+        <div class="volunteer-row">
+          <div class="vol-avatar" style="background:${c.bg};color:${c.text}">${b.initials}</div>
+          <div style="flex:1">
+            <div class="vol-name">${b.name}</div>
+            <div class="vol-bakes">${b.tags.join(', ')}</div>
+          </div>
+          <span class="badge ${b.avail ? 'badge-open' : 'badge-pending'}">${b.avail ? 'Active' : 'Next mo.'}</span>
+        </div>
+      `;
+    }).join('');
+  }
+
+  // ── SLOT ACTIONS ──
+  function releaseSlot(id) {
+    for (const m of ['july','august','september']) {
+      const s = data.slots[m].find(x => x.id === id);
+      if (s) { s.taken = false; s.volunteer = null; break; }
+    }
+    renderSlotsTable(); renderNpoSlotCounts();
+    showToast('Slot released — it\'s open again on the public site.');
+  }
+  function markTaken(id) {
+    for (const m of ['july','august','september']) {
+      const s = data.slots[m].find(x => x.id === id);
+      if (s) { s.taken = true; s.volunteer = 'Admin'; break; }
+    }
+    renderSlotsTable();
+    showToast('Slot marked as taken.');
+  }
+  function deleteSlot(id) {
+    for (const m of ['july','august','september']) {
+      const idx = data.slots[m].findIndex(x => x.id === id);
+      if (idx !== -1) { data.slots[m].splice(idx, 1); break; }
+    }
+    renderSlotsTable(); renderNpoSlotCounts();
+    showToast('Slot removed.');
+  }
+  function deleteNpo(id) {
+    const idx = data.nonprofits.findIndex(x => x.id === id);
+    if (idx !== -1) data.nonprofits.splice(idx, 1);
+    renderNpoTable();
+    showToast('Nonprofit removed.');
+  }
+
+  // ── ADD SLOT ──
+  function openAddSlotModal() {
+    const sel = document.getElementById('new-slot-npo');
+    sel.innerHTML = '<option value="">Select a nonprofit…</option>' +
+      data.nonprofits.map(n => `<option value="${n.id}">${n.name}</option>`).join('');
+    document.getElementById('add-slot-modal').classList.add('open');
+  }
+  function addSlot() {
+    const dateVal = document.getElementById('new-slot-date').value;
+    const npoId = parseInt(document.getElementById('new-slot-npo').value);
+    const type = document.getElementById('new-slot-type').value.trim();
+    if (!dateVal || !npoId) { showToast('Please fill in date and nonprofit.'); return; }
+    const npo = data.nonprofits.find(n => n.id === npoId);
+    const d = new Date(dateVal + 'T00:00:00');
+    const monthNames = ['january','february','march','april','may','june','july','august','september','october','november','december'];
+    const mKey = monthNames[d.getMonth()];
+    const label = d.toLocaleDateString('en-US', { month:'short', day:'numeric' });
+    const newSlot = {
+      id: Date.now(), day: d.getDate(), label,
+      org: npo.name, type: type || 'Any items', taken: false, volunteer: null
+    };
+    if (!data.slots[mKey]) data.slots[mKey] = [];
+    data.slots[mKey].push(newSlot);
+    closeModal('add-slot-modal');
+    document.getElementById('new-slot-date').value = '';
+    document.getElementById('new-slot-npo').value = '';
+    document.getElementById('new-slot-type').value = '';
+    renderSlotsTable(); renderNpoSlotCounts();
+    showToast(`Slot added for ${label} at ${npo.name}.`);
+  }
+
+  // ── ADD NPO ──
+  function openAddNpoModal() { document.getElementById('add-npo-modal').classList.add('open'); }
+  function addNpo() {
+    const name = document.getElementById('new-npo-name').value.trim();
+    const dist = document.getElementById('new-npo-dist').value.trim();
+    const accepts = document.getElementById('new-npo-accepts').value.trim();
+    const hours = document.getElementById('new-npo-hours').value.trim();
+    if (!name) { showToast('Please enter the organization name.'); return; }
+    data.nonprofits.push({ id: Date.now(), name, dist: dist || '–', accepts: accepts || 'All items', days: hours || 'Contact for hours' });
+    closeModal('add-npo-modal');
+    ['new-npo-name','new-npo-dist','new-npo-accepts','new-npo-hours'].forEach(id => document.getElementById(id).value = '');
+    renderNpoTable();
+    showToast(`${name} added as a nonprofit partner.`);
+  }
+
+  // ── ADD BAKER ──
+  function openAddBakerModal() { document.getElementById('add-baker-modal').classList.add('open'); }
+  function addBaker() {
+    const name = document.getElementById('new-baker-name').value.trim();
+    const dist = document.getElementById('new-baker-dist').value.trim();
+    const bio = document.getElementById('new-baker-bio').value.trim();
+    const tags = document.getElementById('new-baker-tags').value.split(',').map(t=>t.trim()).filter(Boolean);
+    if (!name) { showToast('Please enter the baker\'s name.'); return; }
+    const initials = name.split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase();
+    const c = COLORS[data.bakers.length % COLORS.length];
+    data.bakers.push({ id: Date.now(), initials, name, color: c.bg, textColor: c.text, dist: dist || '–', bio: bio || '–', tags, avail: true });
+    closeModal('add-baker-modal');
+    ['new-baker-name','new-baker-email','new-baker-dist','new-baker-bio','new-baker-tags'].forEach(id => document.getElementById(id).value = '');
+    renderBakerList();
+    showToast(`${name} added as a baker volunteer.`);
+  }
+
+  function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    renderSlotsTable();
+    renderNpoTable();
+    renderNpoSlotCounts();
+    renderBakerList();
+    document.querySelectorAll('.modal-overlay').forEach(o => {
+      o.addEventListener('click', e => { if (e.target === o) o.classList.remove('open'); });
+    });
+  });
+</script>
+</body>
+</html>
